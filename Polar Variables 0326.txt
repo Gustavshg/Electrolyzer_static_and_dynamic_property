@@ -1,0 +1,7 @@
+Tue Mar 29 10:48:40 2022
+at1=tf.Variable(initial_value=0.1645)
+at2=tf.Variable(initial_value=-18.96)
+at3=tf.Variable(initial_value=672.5)
+bt1=tf.Variable(initial_value=0.0845)
+bt2=tf.Variable(initial_value=-9.96)
+bt3=tf.Variable(initial_value=350.5)
