@@ -1,107 +1,51 @@
-import collections
+# -*- coding: utf-8 -*-
+import tensorflow as tf
+import numpy as np
 
-string = input()
-string = string[1:-1]
-alist = string.split(',')
-print(alist)
+#  tf.disable_v2_behavior()
 
+# create data
+x_data = np.random.rand(100).astype(np.float32)     # 一百个随机数列  定义数据类型
+y_data = x_data*0.1+0.3          # W为0.3
+# print(y_data)
+# create tensorflow structure start #
+# AttributeError: module 'tensorflow' has no attribute 'random_uniform'
+# V2版本里面random_uniform改为random.uniform
+Weights = tf.Variable(tf.random.uniform((1,), -1.0, 1.0))  # 随机数列生产的参数 [1] W结构为一维 -1.0, 1.0 随机生产数列的范围
+# TypeError: 'function' object is not subscriptable
+# 一般是少了括号
+print(Weights)
+biases = tf.Variable(tf.zeros((1,)))     # 定义初始值 0
+print(biases)
+# y = Weights*x_data+biases
+# 定义预测值y
 
-############# 标准形式
-# alist = [1,2,3,1,null,2,null,null,null,null,null,1,null,null,null]
-############
+def loss():
+    w = Weights * x_data + biases
+    print(tf.keras.losses.MSE(y_data, w))
 
-class Node:
-    def __init__(self, val):
-        self.val = val
-        self.left = None
-        self.right = None
+    return tf.keras.losses.MSE(y_data, w)  # alias 计算loss  预测值与真实值的差别
+# AttributeError: module 'tensorflow_core._api.v2.train' has no attribute 'GradientDescentOptimizer'
+# "tf.train.GradientDescentOptimizer" change "tf.compat.v1.train.GradientDescentOptimizer"
+# `loss` passed to Optimizer.compute_gradients should be a function when eager execution is enabled.
+# 神经网络知道误差以后 优化器（optimizer）减少误差 提升参数的准确度
+# 其中的minimize可以拆为以下两个步骤：
+# ① 梯度计算
+# ② 将计算出来的梯度应用到变量的更新中
+# 拆开的好处是，可以对计算的梯度进行限制，防止梯度消失和爆炸
+# optimizer = tf.compat.v1.train.GradientDescentOptimizer(0.5)
+# train = optimizer.minimize(loss)
+optimizer = tf.keras.optimizers.SGD(learning_rate=0.5)  # alias: tf.optimizers.SGD learning_rate=0.5
+#init = tf.initializer_all_variables()
+#  create tensorflow structure end #
 
+# create session
+# sess = tf.Session()
+# sess.run(init)          # Very important
 
-def creatTree(alist):
-    li = []
-    for a in alist:  # 创建结点
-        if a == 'null':
-            node = Node(a)
-        else:
-            node = Node(int(a))
-        li.append(node)
-    parentNum = len(li) // 2 - 1
-    for i in range(parentNum+1):
-        leftIndex = 2 * i + 1
-        rightIndex = 2 * i + 2
-        if not li[leftIndex].val =='null':
-            li[i].left = li[leftIndex]
-        if rightIndex < len(li) and not li[rightIndex].val =='null':  # 判断是否有右结点， 防止数组越界
-            li[i].right = li[rightIndex]
-    return li[0]
-
-
-# 层次遍历所有的结点
-def BFS(root):
-    queue, result = [root], []
-    while queue:
-        node = queue.pop(0)
-        result.append(node.val)
-        if node.left:
-            queue.append(node.left)
-        if node.right:
-            queue.append(node.right)
-    return result
-
-
-
-def findDuplicateSubtrees(root):
-    def serialize(root):
-        if not root: return '#'
-        return str(root.val) + ',' + serialize(root.left) + ',' + serialize(root.right)
-
-    def traverse(root, counter):
-        if not root: return []
-        res = []
-        chain = serialize(root)
-        # print(chain)
-        counter[chain] += 1
-        if counter[chain] == 2: res.append(root)
-        res += traverse(root.left, counter) + traverse(root.right, counter)
-        return res
-    return traverse(root, collections.Counter())
-
-root = creatTree(alist)
-
-ans_out = findDuplicateSubtrees(root)
-
-tmp_res = []
-res = []
-if not ans_out:
-    print('-1')
-else:
-    size = -1
-    for i_ans in ans_out:
-        tmp_res.clear()
-        tmp_res = BFS(i_ans)
-        if len(tmp_res) > size:
-            size = len(tmp_res)
-            res.clear()
-            res = tmp_res.copy()
-
-    res_final ='['
-    for r in res:
-        res_final+=str(r)+','
-    res_final+= 'null]'
-    print(res_final)
-
-# for l in ans_out :
-#     if  len(l) > size:
-#         size = len(l)
-#         res.clear()
-#         res = l.copy()
-# if size == -1 or size == 0:
-#     print('-1')
-# else:
-#     print(res)
-
-
-
-
-
+for step in range(201):
+    optimizer.minimize(loss,var_list=[Weights,biases])
+    if step % 20 == 0:
+        print("{} step, Weights = {}, biases = {}"
+              .format(step, Weights.read_value(), biases.read_value()))  # read_value函数可用numpy替换
 
