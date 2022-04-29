@@ -147,17 +147,16 @@ class polar_nn():
         T_in = self.exp_dims(T_in)
         current_density = self.exp_dims(current_density)
         LyeFlow = self.exp_dims(LyeFlow)
-        # T_out /= 100
-        # T_in /= 100
-        # current_density /= 4000
-        # lam = 0.204425 / LyeFlow
         inputs = np.concatenate([T_out/100, T_in/100, current_density/4000, 0.204425 / LyeFlow], axis=1)
-        threshold = 750.
+        threshold = 750.#此界限以上是用神经网络，此阈值一下使用极化曲线公式
+
         output = []
         for i in range(len(inputs)):
             """因为以后可能需要我们根据500电密以下的进行两个极化曲线的拼接，所以说需要在这里准备好逐点进行极化特性输出"""
             if current_density[i] >=threshold:
                 output.append(float(self.predict(inputs= inputs[i:i+1])))
+            elif current_density[i] <= 21.5:
+                output.append(float(Vres((T_out[i] + T_in[i])/2)))
             else:
                 input_cur = np.array([[float(inputs[i][0]),float(inputs[i][1]),threshold/4000,float(inputs[i][3])]])
                 std_nn = float(self.predict(inputs= input_cur))
@@ -176,7 +175,7 @@ class polar_nn():
 
 
 
-class polar_nn_shg(tf.keras.Model):
+class polar_nn_shg_trainable(tf.keras.Model):
     """定义一个model类，来进行神经网络的传输和训练"""
 
     def __init__(self):

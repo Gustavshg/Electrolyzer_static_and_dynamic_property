@@ -1,9 +1,7 @@
 """这里开始的代码，我们希望能偶通过已有的极化曲线，来分析工作过程中电解槽偏离极化曲线的部分"""
 import os
 import time
-
 import pandas
-
 import Polar_fitting_collection as polar_collection
 import Polar_data_loader  # 应该我们直接用这个文件就可以进行数据加载，各种日期的都可以
 import matplotlib.pyplot as plt
@@ -22,7 +20,7 @@ for file in SourceFiles:
     current_file = SourceFolder + '/' + file
     polar_nn = polar_collection.polar_nn()
 
-    data_0924 = Polar_data_loader.Original_Data_Loader(SourceFile='20s/Polar Fitting/All Polar-like data.csv')
+    data_0924 = Polar_data_loader.Original_Data_Loader(SourceFile='2s/Original/TJ-20211125.csv')
     inputs, voltage = data_0924.get_all_data()
     T_out, T_in, current_density, LyeFlow = data_0924.get_polar_data()
 
