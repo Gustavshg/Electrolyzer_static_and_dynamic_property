@@ -10,6 +10,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\2s\DynamicResponse\amplitude_1129_first_three.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
       </map>
     </option>
   </component>
