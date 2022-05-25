@@ -66,6 +66,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\20s\Original\TJ-20210924.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\20s\Original\TJ-20211001.csv">
           <value>
             <Attribute>
@@ -396,6 +403,97 @@
           </value>
         </entry>
         <entry key="\Cache\multiple_gaussian_fit_test.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Dynamic model data-20s\Data 0525\TJ-20210924.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Dynamic model data-20s\Data 0525\TJ-20211001.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Dynamic model data-20s\Data 0525\TJ-20211007.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Dynamic model data-20s\Data 0525\TJ-20211014.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Dynamic model data-20s\Data 0525\TJ-20211029.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Dynamic model data-20s\Data 0525\TJ-20211111.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Dynamic model data-20s\Data 0525\TJ-20211123.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Dynamic model data-20s\Data 0525\TJ-20211125.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Dynamic model data-20s\Data 0525\TJ-20211126.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Dynamic model data-20s\Data 0525\TJ-20211129.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Dynamic model data-20s\Data 0525\TJ-20211130.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Dynamic model data-20s\Data 0525\TJ-20211202.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Norm distribution 0425.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
