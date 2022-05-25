@@ -1,9 +1,11 @@
+"""这个文件是20220515开始为红外温度分布梯度问题撰写的函数，已经经过了较好地总结，可以直接调用"""
 import numpy as np
 import pandas
 from scipy import optimize
 
 
 def read_infra(filename):
+    """这里可以读取李昊读取出的txt文件，并且给出反转后的np矩阵"""
     file = open(filename)
     contents = file.readlines()
     file.close()
@@ -21,6 +23,7 @@ def read_infra(filename):
     return img
 
 def img_show(img,file):
+    """给定一个np温度矩阵，画出其温度分布图"""
     import matplotlib.pyplot as plt
     plt.figure(figsize=(8, 8))
     plt.title(
@@ -30,12 +33,12 @@ def img_show(img,file):
     plt.colorbar()
 
 def temp_distribution(img):
+    """得到温度np矩阵之后，将其进行12等分，并且依照从上到下的顺序给出结果"""
     n = 12  # 要将图像如何进行分段（纵向分段）
     step = len(img) // n
-
     seq = []
     df = pandas.DataFrame(columns=['loc', 'temp'])
-    data = np.zeros([1560, 1])
+    data = np.zeros([1560, 1])#如果这里不是12等分，可能需要修改1560的数值才可以
     for i in range(n):
         cur = img[i * step:(i + 1) * step, :]
         cur = cur.flatten()
@@ -46,7 +49,7 @@ def temp_distribution(img):
     return data.T
 
 def list2hist(listdata):
-    # 这里需要将列表数据转化为一个histogram的数据
+    # 这里需要将列表数据转化为一个histogram的数据，展示温度从低到高的密度函数
     mini = min(listdata)
     maxi = max(listdata)
     step = 100
@@ -64,6 +67,7 @@ def list2hist(listdata):
 
 
 def gaussian(x, height, center, width, offset):
+    """原始的高斯分布函数"""
     return height * np.exp(-(x - center) ** 2 / (2 * width ** 2)) + offset
 
 
@@ -72,6 +76,7 @@ def three_gaussians(x,
                     h2, c2, w2,
                     h3, c3, w3,
                     offset):
+    """三峰分布时高斯分布函数"""
     return (gaussian(x, h1, c1, w1, offset=0) +
             gaussian(x, h2, c2, w2, offset=0) +
             gaussian(x, h3, c3, w3, offset=0) +
@@ -79,37 +84,44 @@ def three_gaussians(x,
 
 
 def two_gaussians(x,
-                  h1, c1, w1,
-                  h2, c2, w2,
-                  offset):
+                    h1, c1, w1,
+                    h2, c2, w2,
+                    offset):
+    """双峰分布时高斯分布函数"""
     return (gaussian(x, h1, c1, w1, offset=0) +
             gaussian(x, h2, c2, w2, offset=0) +
             offset)
 
 
 def gaussians_fitting(x, height):
+    """进行多峰高斯分布拟合的函数
+    """
     '''数据的极限'''
     low = x[0]
     high = x[-1]
     '''误差方程'''
+
     errfunc2 = lambda p, x, y: (two_gaussians(x, *p) - y) ** 2
-                               # + p[0] ** 2 + p[3] ** 2 + p[-1] **4
+                               # + p[0] ** 2 + p[3] ** 2 + p[-1] **4#这里的正则化惩罚最好不要加，因为不知道怎么让他发挥作用
     errfunc3 = lambda p, x, y: (three_gaussians(x, *p) - y) ** 2
                                # + p[0] ** 2 + p[3] ** 2 + p[6] ** 2  + p[-1] **4#参数的正则化惩罚项
     '''初始化参数'''
     # guess3 = [20.22, low * 0.8 + high * 0.2, 10.,
     #           30.50, (low + high)/2, 10.,
     #           30.50, low * 0.2 + high * 0.8, 10., 0]
-    guess3 = [20.22, low + 2, 10.,
+    # guess2 = [10.22,low * 0.6 + high * 0.4, 10.,
+    #           50.50, low * 0.4 + high * 0.6, 10., 0]
+    #原始版本的初始峰值，但是较容易出错，所以这里不再使用
+    guess3 = [20.22, low , 10.,
               30.50, (low + high)/2, 10.,
-              30.50, high - 2, 10., 0]
+              30.50, high , 10., 0]
+
     param_bound_3 = ([5.  ,low,1.  ,5.  ,low,1.  ,5.  ,low,1.  ,-5.],
                      [200.,high,200.,200.,high,200.,200.,high,200.,15.])#对每个参数的范围进行限制
 
-    # guess2 = [10.22,low * 0.6 + high * 0.4, 10.,
-    #           50.50, low * 0.4 + high * 0.6, 10., 0]
-    guess2 = [10.22, low + 2, 10.,
-              50.50, high - 2, 10., 0]
+    guess2 = [10.22, low , 10.,
+              50.50, high , 10., 0]
+
     param_bound_2 = ([5.  ,low,1.  ,5.  ,low,1.  ,-5.],
                      [200.,high,200.,200.,high,200.,15.])#对每个参数的范围进行限制
     '''首先进行三曲线拟合'''
@@ -179,9 +191,33 @@ def temp_slope_analysis(temp_distribution_data,threshold = 30,bars = [0,8,11]):#
     # print('normal sampled slope: %f, normal sampled intercept: %f'%(slope,intercept))
     return seq,temp_big,temp_small,height_big,height_small,width_big,width_small,slope,intercept
 
+def show_violin_(data,filename):
+    #filename sample: 'Infra images/1125/IMG20211125093106.txt'
+    import seaborn
+    import matplotlib.pyplot as plt
+    plt.style.use('seaborn')
+    plt.figure(figsize=(15, 8))
+    plt.title('Distribution in temperature of: ' + filename[-14:-10]+' '+filename[-10:-8] + ':'+filename[-8:-6]+':'+filename[-6:-4])
+    plt.subplots_adjust(left=0.073, bottom=0.062, right=0.95, top=0.925)
+    plt.xlabel('From top to bottom')
+    plt.ylabel(r'$Temperature \ (^\circ C)$')
+    '''原始数据的小提琴图'''
+    hh = 1
+    x = np.array([0])
+    y = np.array([0])
+    for line in data:
+        hhh = [hh] * len(line)
+        x = np.concatenate((x, hhh))
+        y = np.concatenate((y, line))
+        hh += 1
+
+    x = x[1:]
+    y = y[1:]
+    seaborn.violinplot(x, y)
 
 
 def show_violin_gaussian_slope(data,filename,bars = [0,8,11]):
+    #对某单张图片的高斯分布以及斜率拟合情况进行分析
     #filename sample: 'Infra images/1125/IMG20211125093106.txt'
     import seaborn
     import matplotlib.pyplot as plt
@@ -207,7 +243,7 @@ def show_violin_gaussian_slope(data,filename,bars = [0,8,11]):
     i = 0
     for line in data:
         if not i in bars:
-
+            # print(i)#用于分析错误时切片使用
             x, height = list2hist(line)
             res = gaussians_fitting(x, height)
             for j in [0,3,6]:
@@ -221,12 +257,12 @@ def show_violin_gaussian_slope(data,filename,bars = [0,8,11]):
                 plt.scatter(i, res[1], res[0], edgecolors='b')
                 plt.scatter(i, res[4], res[3], edgecolors='b')
         i += 1
-    temp_min = min(data[2])
-    temp_max = max(data[2])
-    thre = 0.6 * temp_min + 0.4 * temp_max
+    temp_min = min(data[1])
+    temp_max = max(data[1])
+    thre = 0.8 * temp_min + 0.2* temp_max
     thre_max = 50
     if thre >= thre_max:
-        thre = thre_max
+        thre = thre_max#这里的thre可能是温度是否能够狗正常拟合的关键，目前这样是适配比较好的参数
     seq, temp_big, temp_small, height_big, height_small, width_big, width_small,slope,intercept = temp_slope_analysis(data,thre, bars)
 
     plt.plot(seq,temp_big,label = 'Primary center')
@@ -234,10 +270,10 @@ def show_violin_gaussian_slope(data,filename,bars = [0,8,11]):
     '''线性拟合与分析'''
 
     plt.plot([0,11],[intercept,intercept+12*slope],'red',label = 'Primary fitted, slope = %f, intercept = %f'%(slope,intercept))
-
     plt.legend()
 
 def exam(data,slice,filename):
+    #抽取某个文件中的单根出来查看高斯分布拟合情况
     #filename sample: 'Infra images/1125/IMG20211125093106.txt'
     import seaborn
     import matplotlib.pyplot as plt
@@ -250,9 +286,9 @@ def exam(data,slice,filename):
     errfunc3 = lambda p, x, y: (three_gaussians(x, *p) - y) ** 2
                                # + p[0] ** 2 + p[3] ** 2 + p[6] ** 2  + p[-1] **4#参数的正则化惩罚项
     '''原始的exam代码'''
-    guess3 = [20.22, low + 2, 10.,
+    guess3 = [20.22, low + 1, 10.,
               30.50, (low + high)/2, 10.,
-              30.50, high - 2, 10., 0]
+              30.50, high - 1, 10., 0]
     param_bound_3 = ([5.  ,low,1.  ,5.  ,low,1.  ,5.  ,low,1.  ,-5.],
                      [200.,high,200.,200.,high,200.,200.,high,200.,15.])#对每个参数的范围进行限制
 
@@ -261,6 +297,7 @@ def exam(data,slice,filename):
     param_bound_2 = ([5.  ,low,1.  ,5.  ,low,1.  ,-5.],
                      [200.,high,200.,200.,high,200.,15.])#对每个参数的范围进行限制
     print(guess3)
+    print(param_bound_3)
     '''使用了最终版slope分析代码'''
     # guess3 = [20.22, low * 0.8 + high * 0.2, 10.,
     #           30.50, (low + high)/2, 10.,
@@ -272,7 +309,7 @@ def exam(data,slice,filename):
               50.50, low * 0.4 + high * 0.6, 10., 0]
     # param_bound_2 = ([5.  ,low,1.  ,5.  ,low,1.  ,-5.],
     #                  [200.,high,200.,200.,high,200.,15.])#对每个参数的范围进行限制
-    print(guess3)
+
 
     optim3, success = optimize.curve_fit(three_gaussians, x, height, p0=guess3, bounds=param_bound_3,maxfev=50000)
     # optim3, success = optimize.leastsq(errfunc3, params, args=(x, height))#需去掉这部分

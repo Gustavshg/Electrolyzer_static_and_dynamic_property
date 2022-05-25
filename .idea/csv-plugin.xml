@@ -108,6 +108,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\20s\Original\TJ-20211130.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\20s\Original\TJ-20211202.csv">
           <value>
             <Attribute>
