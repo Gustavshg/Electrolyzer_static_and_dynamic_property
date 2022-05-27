@@ -493,13 +493,6 @@
             </Attribute>
           </value>
         </entry>
-        <entry key="\Norm distribution 0425.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
       </map>
     </option>
   </component>

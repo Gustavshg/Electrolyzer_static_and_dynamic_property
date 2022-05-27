@@ -163,8 +163,7 @@ if add_columns == 1:
     # plt.show()
 
 """加入极化曲线电压"""
-add_polar = 1
-import Polar_fitting_collection as polar
+
 import time
 
 OriginalColumns = ['时间', '电解电压', '电解电流', '产氢量', '产氢累计量',
@@ -174,7 +173,10 @@ OriginalColumns = ['时间', '电解电压', '电解电流', '产氢量', '产�
                    'Tlye', 'TH2', 'TO2', 'Tout', 'LyeFlow', 'LyeFlow_Polar', 'dI', 'dj',
                    'dV', 'dTout', 'HTO', 'OTH'],
 t0 = time.time()
+add_polar = 0
 if add_polar == 1:
+    import Polar_fitting_collection as polar
+    """这里需要把电流密度、入口温度、碱液流量进行错位，用下一时刻的这三个数值，再加上当前时刻的出口温度，得到当前时刻预测下一时刻的极化电压"""
     nn_polar = polar.polar_nn()
     for date in dates:
         print(date)
@@ -194,3 +196,72 @@ if add_polar == 1:
         df.to_csv(os.path.join(source_folder, date))
 
     print(time.time()- t0)
+
+add_static_and_dynamic_voltage = 0
+if add_static_and_dynamic_voltage == 1:
+    import Polar_fitting_collection as polar
+    """这里根据我们电化学动态响应的思路进行改造，即使用上一时刻温度与当前时刻电流密度、碱液流量、入口温度等计算当前时刻静态电压，并且和动态电压做差值，得到模型预测的标的"""
+    nn_polar = polar.polar_nn()
+    for date in dates:
+        print(date)
+        df = pandas.read_csv(os.path.join(source_folder, date))
+        print(df.columns)
+        T_out = df['Tout']
+
+        T_out = list(T_out[1:])
+        T_out.append(T_out[-1])
+        T_out = np.array(T_out)
+        current_density = df['Current density']
+        T_in = df['Tlye']
+        LyeFlow = df['LyeFlow_Polar']
+        V_static = nn_polar.polar(T_out, T_in, current_density, LyeFlow)
+
+        df['V_static'] = V_static#静态电压即为预测下一状态的极化电压
+        df['V_dynamic'] = df['V']-V_static#动态电压就是下一秒真实值和静态电压的差值
+        df.to_csv(os.path.join(source_folder, date))
+
+        # ax1 = plt.gca()
+        # ax1.plot(df['V_static'],'green')
+        # ax1.plot(df['V'],'red')
+        # ax1.legend(['static voltage','original voltage'],loc = 1)
+        # ax2 = ax1.twinx()
+        # ax2.plot(df['V_dynamic'])
+        # ax2.legend(['dynamic voltage'], loc = 2)
+        # plt.show()
+
+    print(time.time()- t0)
+
+
+
+
+smooth= 0
+if smooth == 1:
+    import Smoothen as sm
+
+    for date in dates:
+        print(date)
+        df = pandas.read_csv(os.path.join(source_folder, date))
+        Tout = df['Tout']
+        dT = df['dTout']
+        if not 'dTout_WL' in df:
+            # Tout_AA = sm.AA(Tout)
+            # Tout_EMA = sm.EMA(Tout)
+            Tout_WL = sm.WL(Tout)
+
+            # dT_AA = sm.diff(Tout_AA)
+            # dT_EMA = sm.diff(Tout_EMA)
+            dT_WL = sm.diff(Tout_WL)
+            df['dTout_WL'] = dT_WL
+            df.to_csv(os.path.join(source_folder, date))
+
+    # step = 0.3
+    # plt.style.use('seaborn')
+    # plt.figure(figsize=(15, 8))
+    # plt.title('不同平滑方式与效果',fontproperties=my_font)
+    # plt.subplots_adjust(left=0.073, bottom=0.062, right=0.95, top=0.925)
+    # plt.plot(df['dTout'],label = 'raw')
+    # plt.plot(dT_AA + step, label='algebra average')
+    # plt.plot(dT_EMA + step*2, label='moving average')
+    # plt.plot(dT_WL + step*3, label='WL transform')
+    # plt.legend()
+    # plt.show()
