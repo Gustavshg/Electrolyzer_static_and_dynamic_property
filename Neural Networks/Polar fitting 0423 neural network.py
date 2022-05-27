@@ -194,7 +194,7 @@ t0 = time.time()
 num_epochs = 0
 learning_rate = 1E-3
 batch_size = 50
-storage_file = 'Neural Networks/Polarization/Trial/checkpoint-0423-3.ckpt'
+storage_file = 'Polarization/Trial/checkpoint-0423-3.ckpt'
 dataloader = DataLoader()
 
 read_model = 1

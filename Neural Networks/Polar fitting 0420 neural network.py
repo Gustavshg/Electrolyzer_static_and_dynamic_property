@@ -179,7 +179,7 @@ t0 = time.time()
 num_epochs = 2000
 learning_rate = 1E-3
 batch_size = 50
-storage_file = 'Neural Networks/Polarization/Trial/checkpoint.ckpt'
+storage_file = 'Polarization/Trial/checkpoint.ckpt'
 dataloader = DataLoader()
 
 model = tf.keras.models.load_model(storage_file)
